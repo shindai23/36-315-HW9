@@ -1,6 +1,6 @@
 ---
 title: "36-315 Homework 09, Fall 2017"
-author: "Your Group Number, Group Member Names, and Group Member AndrewIDs Here"
+author: "Your Group Number, Group Member Names, and Group Member AndrewIDs Here o "
 date: "Due Thursday, Thursday 9th, 2017 (11:59pm ET) on Canvas"
 output: 
   html_document:
