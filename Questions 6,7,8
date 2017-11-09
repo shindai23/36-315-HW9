@@ -1,1 +1,64 @@
 
+#  Problem 6
+
+(1 point each)
+
+**Arc Pie Charts**
+
+Install and load the `ggforce` package.  This package implements several updates and improvements to `ggplot2`.
+
+a.  Create an "arc pie chart" of the `Type` variable in the `Cars93` dataset.  (Code provided.)
+
+```{r, warning = FALSE, message = FALSE, height = 6, width = 7}
+library(ggforce)
+Cars93 %>% group_by(Type) %>% 
+  summarize(count = n()) %>% 
+  mutate(max = max(count),
+         focus_var = 0.2 * (count == max(count))) %>%
+  ggplot() + geom_arc_bar(aes(x0 = 0, y0 = 0, r0 = 1.2, r = 1, 
+                              fill = Type, amount = count), 
+                          stat = 'pie')
+```
+
+b.  Adjust the `r0` parameter to lower and higher values.  What does this control?  What is the minimum and maximum value?
+
+The r0 parameter controls how thick the arc pie chart is. The minimum value is 0 and the maximum value is 1.
+
+
+c.  Recreate the graph from (a), but this time, add `explode = focus_var` into your call to `aes()`.  What does this do?
+
+```{r}
+Cars93 %>% group_by(Type) %>% 
+  summarize(count = n()) %>% 
+  mutate(max = max(count),
+         focus_var = 0.2 * (count == max(count))) %>%
+  ggplot() + geom_arc_bar(aes(x0 = 0, y0 = 0, r0 = 1.2, r = 1, 
+                              fill = Type, amount = count, explode = focus_var), 
+                          stat = 'pie')
+
+```
+
+This draws our attention to the variable of most interest. The section of the chart becomes disconnected, which puts more emphasis on that variable. 
+
+d.  Recreate the graph from (c), but this time, add focus to the category with the minimum number of observations.
+
+```{r}
+Cars93 %>% group_by(Type) %>% 
+  summarize(count = n()) %>% 
+  mutate(min = min(count),
+         focus_var = 0.2 * (count == min(count))) %>%
+  ggplot() + geom_arc_bar(aes(x0 = 0, y0 = 0, r0 = 1.2, r = 1, 
+                              fill = Type, amount = count, explode = focus_var), 
+                          stat = 'pie')
+
+```
+
+
+e.  (4 points)  Critique these graphs.  
+
++  What would you use an arc pie chart to visualize?  (I.e. what type of data?  How many dimensions/variables?)
++  What are the issues with arc pie charts?  
++  What are the issues with using `explode` to focus on a particular variable?
+
+
+Ideally, you would use an arc pie chart to visualize discrete, 2d quantities. An issue with arc pie charts is that it is sometimes hard to determine the areas of the categories with respect to each other. An issue with using "explode" is that the graph looks disconnected and further distorts our perception of area. 
