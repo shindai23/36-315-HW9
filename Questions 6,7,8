@@ -62,3 +62,67 @@ e.  (4 points)  Critique these graphs.
 
 
 Ideally, you would use an arc pie chart to visualize discrete, 2d quantities. An issue with arc pie charts is that it is sometimes hard to determine the areas of the categories with respect to each other. An issue with using "explode" is that the graph looks disconnected and further distorts our perception of area. 
+
+#  Problem 7
+
+(5 points each)
+
+**Zoom Zoom**
+
+See the following code working with the IMDb movies dataset from Homework 7 for how to use `facet_zoom()`.
+
+```{r, warning = FALSE, message = FALSE}
+library(tidyverse)
+library(forcats)
+library(devtools)
+library(ggforce)
+
+#  Colorblind-friendly color pallette
+my_colors <- c("#000000", "#56B4E9", "#E69F00", "#F0E442", "#009E73", "#0072B2", 
+               "#D55E00", "#CC7947")
+
+#  Read in the data
+imdb <- read_csv("https://raw.githubusercontent.com/mateyneykov/315_code_data/master/data/imdb_test.csv")
+
+# get some more variables
+imdb <- mutate(imdb, profit = (gross - budget) / 1000000,
+               is_french = ifelse(country == "France", "Yes", "No")) %>%
+  filter(movie_title != "The Messenger: The Story of Joan of Arc")
+france_1990 <- filter(imdb, country == "France", title_year >= 1990)
+
+# this code plots a scatterplot + a zoomed facet
+ggplot(data = imdb, aes(x = title_year, y = profit)) + 
+  geom_point(color = my_colors[1], alpha = 0.25) + 
+  geom_smooth(color = my_colors[2]) + 
+  geom_point(data = france_1990, color = my_colors[3]) + 
+  geom_smooth(data = france_1990, aes(x = title_year, y = profit), 
+              color = my_colors[4], method = lm) + 
+  facet_zoom(x = title_year >= 1990) + 
+  labs(title = "Movie Profits over Time",
+       subtitle = "Zoom:  French Movies from 1990 -- 2017 (orange/yellow)",
+       caption = "Data from IMDB and Kaggle",
+       x = "Year of Release",
+       y = "Profit (millions of USD)")
+```
+
+Also read the articles [here](https://www.r-bloggers.com/announcing-ggforce-accelerating-ggplot2/), or [here](https://cran.r-project.org/web/packages/ggforce/vignettes/Visual_Guide.html#b-splines).
+
+a.  Recreate any scatterplot that we created throughout the year, and zoom in on a section of the graph via the `facet_zoom()` feature in the newest version of the `ggforce` package.  Include a title, subtitle, and caption in the resulting graph.  The caption should just state the data source, and the subtitle should explain what area of the plot is being enhanced via zooming.
+
+```{r}
+gm <- read_csv("http://bioconnector.org/data/gapminder.csv")
+gm_sub <- gm %>% filter(year > 2000) #data we would actually use.
+ggplot(gm_sub, aes(x = log(gdpPercap), y = lifeExp)) + geom_point(aes(color = continent)) + facet_zoom(x = log(gdpPercap) > 9) + 
+  labs(title = "Scatterplot of GDP and Life Expectancy",
+       subtitle = "Zoom:  Log of GDP greater than 9.0",
+       caption = "Data from bioconnector.com",
+       x = "Log of GDP Per Capita",
+       y = "Life Expectancy")
+
+```
+
+
+b.  Interpret the resulting graph:  Describe some feature of the new version of the graph that you may not have been able to see very well in the previous version of the same graph (without zooming).
+
+With the new zooming feature, we are able to see the distribution of countries with a log of GDP per capita greater than 9 in more detail. In the new graph, we can now see how countries in Europe match up to countries in the Americas.
+
