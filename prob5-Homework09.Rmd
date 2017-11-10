@@ -8,62 +8,31 @@ output:
     toc_float:  true
     code_folding:  hide
 ---
-
+**Hadley Wickham's Advanced R Style Guide**
 ##  Homework 09:  Networks, Variable Visualization, and New 1-D Graph Critiques
 
-***General instructions for all assignments***: 
-
-+  Use this file as the template for your submission.  Delete the unnecessary text (e.g. this text, the problem statements, etc).  That said, keep the nicely formatted "Problem 1", "Problem 2", "a.", "b.", etc
-+  Upload a single `R` Markdown file (named as:  [AndrewID]-315-HW09.Rmd -- e.g. "mneykov-315-HW09.Rmd") to the Homework 09 submission section on Canvas.  You do not need to upload the .html file.
-+  The instructor and TAs will run your .Rmd file on their computers.  **If your .Rmd file does not knit on our computers, you will be automatically be deducted 10 points.**
-+  Your file should contain the code to answer each question in its own code block.  Your code should produce plots/output that will be automatically embedded in the output (.html) file
-+  Each answer must be supported by written statements (unless otherwise specified)
-+  Include the name of anyone you collaborated with at the top of the assignment
-+  Include the style guide you used below under Problem 0
-
-
 ***
 ***
-
-##  Important Note -- This Is A Group Assignment!
-
-You should complete HW09 **as a group**.  Only one submission is needed per group.  Groups that submit multiple assignments may lose points at the instructors' discretion.
-
 
 #  Problem 0
 
-**Organization, Themes, and HTML Output**
++ Group Theme
+```{r, warning = FALSE, message = FALSE}
+library(tidyverse)
+group1_315_theme <-  theme_bw() + theme (
+      plot.title = element_text(size = 14, face = "bold", 
+                                lineheight = 1.2, color = "firebrick", family = "serif"),
+      axis.text = element_text(size = 9),
+      text = element_text(size = 10, face = "bold", color = "dodgerblue4"))
 
-(5 points)
+```
++ Some Color Palettes
+```{r, warning = FALSE, message = FALSE}
+achidamb_color_palette <- c("#2D3184","#0082A6", "#4EBBB9", "#9CDFC2", "#D8F0CD","#F3F1E4")
+xhuang1_color_palette <- c("#2D3184","#0082A6", "#4EBBB9", "#9CDFC2", "#D8F0CD","#F3F1E4")
+```
 
-a.  For all problems in this assignment, organize your output as follows:
-
-+  Use code folding for all code.  See [here](http://blog.rstudio.org/2016/03/21/rmarkdown-v0-9-5/) for how to do this.
-+  Use a floating table of contents.
-+  Suppress all warning messages in your output by using `warning = FALSE` and `message = FALSE` in every code block.
-+  Use tabs only if you see it fit to do so -- this is your choice.
-
-
-b.  For all problems in this assignment, adhere to the following guidelines for your `ggplot` theme and use of color:
-
-+  Do not use the default `ggplot()` color scheme.
-+  For any bar chart or histogram, outline the bars (e.g. with `color = "black"`).
-+  Do not use both red and green in the same plot, since a large proportion of the population is red-green colorblind.
-+  Try to only use three colors (at most) in your themes.  In previous assignments, many students are using different colors for the axes, axis ticks, axis labels, graph titles, grid lines, background, etc.  This is unnecessary and only serves to make your graphs more difficult to read.  Use a more concise color scheme.
-+  Make sure you use a white or gray background (preferably light gray if you use gray).
-+  Make sure that titles, labels, and axes are in dark colors, so that they contrast well with the light colored background.
-+  Only use color when necessary and when it enhances your graph.  For example, if you have a univariate bar chart, there's no need to color the bars different colors, since this is redundant.
-+  In general, try to keep your themes (and written answers) professional.  Remember, you should treat these assignments as professional reports.
-
-
-c.  Treat your submission as a formal report:
-
-+  Use complete sentences when answering questions.  
-+  Answer in the context of the problem.  
-+  Treat your submission more as a formal "report", where you are providing details analyses to answer the research questions asked in the problems.
-
-
-d.  What style guide are you using for this assignment?
+We are using the Hadley Wickham's Advanced R Style Guide for this assignment.
 
 
 ***
@@ -90,7 +59,7 @@ cont_cols <- which(names(Cars93) %in%
                        "Horsepower", "RPM", "Fuel.tank.capacity", "Passengers",
                        "Length", "Wheelbase", "Width", "Turn.circle", "Weight"))
 
-ggparcoord(Cars93, columns = cont_cols) + aes(color = factor(Type))
+ggparcoord(Cars93, columns = cont_cols) + aes(color = factor(Type)) + coord_flip()
 ```
 
 b.  Do any of the car types get better mileage than others?  Which car types fit the most passengers?

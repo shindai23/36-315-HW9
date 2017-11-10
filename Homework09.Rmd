@@ -25,28 +25,25 @@ output:
 ***
 ***
 
-##  Important Note -- This Is A Group Assignment!
-
-You should complete HW09 **as a group**.  Only one submission is needed per group.  Groups that submit multiple assignments may lose points at the instructors' discretion.
-
-
 #  Problem 0
 
-b.  
-THEME:
-```{r,warning=FALSE,message=FALSE}
++ Group Theme
+```{r, warning = FALSE, message = FALSE}
 library(tidyverse)
-achidamb_315_theme <-  theme_bw() + # White background, black and white theme
-  theme(axis.text = element_text(size = 10, color = "navy",family = "serif"),
-        text = element_text(size = 14, face = "bold", color = "navy"))
+group1_315_theme <-  theme_bw() + theme (
+      plot.title = element_text(size = 14, face = "bold", 
+                                lineheight = 1.2, color = "firebrick", family = "serif"),
+      axis.text = element_text(size = 9),
+      text = element_text(size = 10, face = "bold", color = "dodgerblue4"))
+
 ```
-COLOR:
-```{r,warning=FALSE,messsage = FALSE}
++ Some Color Palettes
+```{r, warning = FALSE, message = FALSE}
 achidamb_color_palette <- c("#2D3184","#0082A6", "#4EBBB9", "#9CDFC2", "#D8F0CD","#F3F1E4")
+xhuang1_color_palette <- c("#2D3184","#0082A6", "#4EBBB9", "#9CDFC2", "#D8F0CD","#F3F1E4")
 ```
 
-d.
-I am using the Hadley Wickham's Advanced R Style Guide for this assignment.
+We are using the Hadley Wickham's Advanced R Style Guide for this assignment.
 
 ***
 ***
@@ -88,9 +85,18 @@ ggparcoord(Cars93, columns = cont_cols) + aes(color = factor(Type)) + coord_flip
 
 d.  What is the default y-axis in this implementation of parallel coordinates charts?  (Hint:  Look at the `scale` parameter.)  What could you change the scale parameter to in order to mimic the way parallel coordinates charts were introduced in class?  Do this, and create a new graph showing the result.
 
-The default y-axis is standard deviation. 
+The default scale for y-axis is standard deviation, which allows us to compare how much different car types vary at each variable. The parameter that matches our introduction in class is `uniminmax` and we didn't flip the coordinates.
+
+```{r}
+ggparcoord(Cars93, columns = cont_cols, scale = "uniminmax") + aes(color = factor(Type)) +  
+  labs(title = "Value vs Variables by Type of Car", ylab = "Variables", xlab = "Value") +
+  achidamb_315_theme
+```
+
 
 e.  Are any adjacent pairs of variables in your graph from part (d) positively correlated?  Are any adjacent pairs of variables negatively correlated?  Answer this using your parallel coordinates plot, and explain how you obtained this answer.  (It may help to wait until Monday's lecture to answer this.)
+
+There aren't any two types that are really positively correlated. The two most positively correlated car types are probably car types (1,3) and (2,3). The type 3 color lines are usually between type 2 and type 1, and they tend to follow a similar pattern with slightly different degree. The two pairs that are most negatively correlated are type (4,6) and (2,4). Type 4 is mostly at the opposite value as 2 and 6, for example, for the last five variables, type 4 cars are mostly at the bottom with values around 0, but type 2 adn 6 are all the way on the top with values close to 1.
 
 
 
