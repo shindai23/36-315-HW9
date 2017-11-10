@@ -1,6 +1,6 @@
 ---
 title: "36-315 Homework 09, Fall 2017"
-author: "Group 1, Arjun Chidambaram, Edward Ang, Masahiro Abe, Killian Huang: xhuang1"
+author: "Group 1, Arjun Chidambaram: achidamb, Edward Ang: edwardan, Masahiro Abe: mabe, Killian Huang: xhuang1"
 date: "Due Thursday, Thursday 9th, 2017 (11:59pm ET) on Canvas"
 output: 
   html_document:
@@ -29,8 +29,9 @@ group1_315_theme <-  theme_bw() + theme (
 ```
 + Some Color Palettes
 ```{r, warning = FALSE, message = FALSE}
-achidamb_color_palette <- c("#2D3184","#0082A6", "#4EBBB9", "#9CDFC2", "#D8F0CD","#F3F1E4")
-xhuang1_color_palette <- c("#2D3184","#0082A6", "#4EBBB9", "#9CDFC2", "#D8F0CD","#F3F1E4")
+group1_color_palette1 <- c("#2D3184","#0082A6", "#4EBBB9", "#9CDFC2", "#D8F0CD","#F3F1E4")
+group1_color_palette2 <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+group1_color_palette3 <- c("#9A8822", "#F5CDB4", "#F8AFA8", "#FDDDA0", "#74A089", "#29211F")
 ```
 
 We are using the Hadley Wickham's Advanced R Style Guide for this assignment.
@@ -61,7 +62,8 @@ ggparcoord(Cars93, columns = cont_cols) + aes(color = factor(Type)) +
     y = "Value" ) + 
   coord_flip() + 
   group1_315_theme + 
-  guides(color = guide_legend(title = "Car Type"))
+  guides(color = guide_legend(title = "Car Type")) +
+  scale_colour_manual(values = group1_color_palette2)
 ```
 
 ## PART B
@@ -70,16 +72,17 @@ Car type 4 gets better milage in MPG.highway and MPG.city than the rest of the c
 
 ## PART C
 
-```{r}
+```{r, warning = FALSE, message = FALSE}
 ggparcoord(Cars93, columns = cont_cols) + aes(color = factor(Type)) + 
   coord_flip() + 
   labs(
     title = "Value vs Variables by Type of Car", 
-    ylab = "Variables", 
-    xlab = "Value") + 
+    x = "Variables", 
+    y = "Value") + 
   coord_polar() +
   group1_315_theme +
-  guides(color = guide_legend(title = "Car Type"))
+  guides(color = guide_legend(title = "Car Type")) +
+  scale_colour_manual(values = group1_color_palette2)
 ```
 
 Parallel coordinate graph in part a is easier to read because the values are labeled in a circle in the polar coordinate graph. The graph also attracts readers' attention to the outer/greater value (i.e. 4)but not so much to lower values (i.e. -2), which is a distortion.
@@ -88,17 +91,18 @@ Parallel coordinate graph in part a is easier to read because the values are lab
 
 The default scale for y-axis is standard deviation, which allows us to compare how much different car types vary at each variable. The parameter that matches our introduction in class is `uniminmax` and we didn't flip the coordinates.
 
-```{r}
+```{r, warning = FALSE, message = FALSE}
 ggparcoord(Cars93, columns = cont_cols, scale = "uniminmax") + 
   aes(color = factor(Type)) +  
   labs(
     title = "Value vs Variables by Type of Car", 
-    ylab = "Variables", 
-    xlab = "Value",
-    fill = "a") +
+    x = "Variables", 
+    y = "Value"
+    ) +
   group1_315_theme +
   theme(axis.text.x = element_text(angle = 30, hjust = 1)) +
-  guides(color = guide_legend(title = "Car Type"))
+  guides(color = guide_legend(title = "Car Type")) +
+  scale_colour_manual(values = group1_color_palette2)
 ```
 
 ## PART E
@@ -255,7 +259,7 @@ We could use the covariance between the continuous variables instead of the corr
 
 
 
-#  Problem 4
+#  Problem 4 {.tabset}
 
 
 ## PART A
@@ -303,10 +307,10 @@ love_dend %>%
   ggplot(horiz = T) +
   labs(title = "Adjacency of Actors in Love Actually", 
        y = "Pairwise Euclidean Distance") +
-  group1_315_theme +
   theme(axis.title.y = element_blank(),
         axis.title.x = element_text(color = "black"),
-        axis.text.x = element_text(color = "black", angle = 90))
+        axis.text.x = element_text(color = "black", angle = 90)) +
+  group1_315_theme
 ```
 
 ## PART C
@@ -326,11 +330,11 @@ library(ggraph)
 ggraph(love_hc, layout = "dendrogram") +
   geom_edge_elbow() +
   labs(title = "Adjacency of Actors in Love Actually",
-       x = "Actor",
+       x = "Actors",
        y = "Pairwise Euclidean Distance") +
-  group1_315_theme +
   theme(axis.ticks = element_blank(),
-        axis.text.x = element_blank())
+        axis.text.x = element_blank()) +
+  group1_315_theme
 ```
 
 ## PART F
@@ -347,6 +351,9 @@ graph <- graph_from_adjacency_matrix(as.dist(love_adjacency[,-1]))
 ggraph(graph, layout = 'graphopt') + 
     geom_edge_link() +
   group1_315_theme +
+  labs(
+    title = "Love Actually Network"
+  ) +
   theme(axis.title = element_blank(),
         axis.ticks = element_blank(),
         axis.text = element_blank())
@@ -355,18 +362,63 @@ ggraph(graph, layout = 'graphopt') +
 
 ## PART G
 
-```{r, fig.height = 8, fig.width = 12}
+```{r, fig.height = 5, fig.width = 7, warning = FALSE, message = FALSE}
 # change to circular, arcs and add text
+V(graph)$Popularity <- degree(graph, mode = 'in')
+
 ggraph(graph, layout = 'linear', circular = TRUE) + 
-    geom_edge_arc() + 
-    geom_node_text(aes(label = names)) +
+  geom_edge_arc() +
+  geom_node_point(aes(size = Popularity)) +  
+  geom_node_text(aes(label = names), nudge_x = 0.2, nudge_y = 0.2, 
+                 size = 6, hjust = 1, vjust = 2, color = "navy", fontface = "bold") +
+  theme_graph(foreground = 'steelblue', fg_text_colour = 'white') +
+  labs(
+    title = "Love Actually Network"
+  ) +
   group1_315_theme +
-  theme(axis.title = element_blank(),
-        axis.ticks = element_blank(),
+  theme(axis.ticks = element_blank(),
         axis.text = element_blank())
 ```
 
 ## PART H (BONUS) Color the nodes of the graph by the gender of the actor/actress.  Facet on the gender of the actor/actress.
+
+
+```{r, fig.height = 5, fig.width = 7, warning = FALSE, message = FALSE}
+
+females = c("Keira Knightley", "Heike Makatsch", "Emma Thompson", "Laura Linney")
+love_adjacency <- mutate(love_adjacency,
+                         gender = ifelse(actors %in% females, 1,  0))
+
+# define names, graph (dist)
+names <- love_adjacency[,1]
+genders <- factor(love_adjacency$gender)
+
+# meltDF$variable=as.numeric(levels(meltDF$variable))[meltDF$variable]
+
+graph <- graph_from_adjacency_matrix(as.dist(love_adjacency[-c(1,16)]))
+# g = c("M","M","M","M","M","M","M","F","M","M","M","M","M","M","M")
+# gp = c(0,0,0,1,0,0,0,0,1,1,1,0,0,0)
+
+V(graph)$Popularity <- degree(graph, mode = 'in')
+V(graph)$Gender <- genders
+graph <- graph %>% set_vertex_attr("Gender", value = genders)
+
+
+ggraph(graph, layout = 'linear', circular = TRUE) + 
+  geom_edge_arc() +
+  geom_node_point(aes(color = genders, size = Popularity)) +
+  geom_node_text(aes(label = names), nudge_x = 0.2, nudge_y = 0.2,
+                 size = 6, hjust = 1, vjust = 2, color = "navy", fontface = "bold") +
+  theme_graph(foreground = 'steelblue', fg_text_colour = 'white') +
+  labs(
+    title = "Love Actually Network"
+  ) +
+  group1_315_theme +
+  theme(axis.ticks = element_blank(),
+        axis.text = element_blank()) +
+  scale_colour_manual(values = group1_color_palette2)
+  
+```
 
 
 ***
@@ -396,12 +448,12 @@ ggplot(df, aes(x = x, y = y, fill = category)) +
   geom_tile(color = "black", size = 0.5) +
   scale_x_continuous(breaks = NULL) +
   scale_y_continuous(breaks = NULL) +
-  scale_fill_brewer(palette = "Set3") +
   labs(title = "Waffle Chart of Car Type",
        caption = "Source:  Cars93 Dataset", 
        fill = "Car Type",
        x = NULL, y = NULL) + 
-  theme_bw() + group1_315_theme
+  theme_bw() + group1_315_theme +
+  scale_fill_manual(values = group1_color_palette2)
 ```
 
 The purpose of waffle chart is to visualize the proportions of each category of the `fill` variable. It should be used on categorical `fill` data like car type in this example. Usually only one variable is enough, which is the `fill` variable. However, if we need to, we can also facet it based on other variables. 
@@ -427,12 +479,12 @@ ggplot(df, aes(x = x, y = y, fill = category)) +
   geom_tile(color = "black", size = 0.5) +
   scale_x_continuous(breaks = NULL) +
   scale_y_continuous(breaks = NULL) +
-  scale_fill_brewer(palette = "Set3") +
   labs(title = "Waffle Chart of Content Rating",
        caption = "Source: IMDB", 
        fill = "Content Rating",
        x = NULL, y = NULL) + 
-  group1_315_theme
+  group1_315_theme +
+  scale_fill_manual(values = group1_color_palette2)
 ```
 
 
@@ -455,7 +507,7 @@ There are three main issues with waffle charts:
 
 ## PART A
 
-```{r, warning = FALSE, message = FALSE, height = 7, width = 7}
+```{r, warning = FALSE, message = FALSE, fig.height = 3, fig.width = 4}
 library(ggforce)
 Cars93 %>% group_by(Type) %>% 
   summarize(count = n()) %>% 
@@ -471,7 +523,8 @@ Cars93 %>% group_by(Type) %>%
   ) +
   scale_x_continuous(breaks = NULL) +
   scale_y_continuous(breaks = NULL) + 
-  group1_315_theme
+  group1_315_theme +
+  scale_fill_manual(values = group1_color_palette2)
 ```
 
 ## PART B
@@ -481,7 +534,7 @@ The r0 parameter controls how thick the arc pie chart is. The minimum value is 0
 
 ## PART C
 
-```{r}
+```{r, warning = FALSE, message = FALSE, fig.height = 3, fig.width = 4}
 Cars93 %>% group_by(Type) %>% 
   summarize(count = n()) %>% 
   mutate(max = max(count),
@@ -496,7 +549,8 @@ Cars93 %>% group_by(Type) %>%
   ) +
   scale_x_continuous(breaks = NULL) +
   scale_y_continuous(breaks = NULL) + 
-  group1_315_theme
+  group1_315_theme +
+  scale_fill_manual(values = group1_color_palette2)
 
 ```
 
@@ -504,7 +558,7 @@ This draws our attention to the variable of most interest. The section of the ch
 
 ## PART D
 
-```{r}
+```{r, warning = FALSE, message = FALSE, fig.height = 3, fig.width = 4}
 Cars93 %>% group_by(Type) %>% 
   summarize(count = n()) %>% 
   mutate(min = min(count),
@@ -519,7 +573,8 @@ Cars93 %>% group_by(Type) %>%
   ) +
   scale_x_continuous(breaks = NULL) +
   scale_y_continuous(breaks = NULL) + 
-  group1_315_theme
+  group1_315_theme +
+  scale_fill_manual(values = group1_color_palette2)
 
 ```
 
@@ -573,15 +628,17 @@ ggplot(data = imdb, aes(x = title_year, y = profit)) +
 
 ## PART A
 
-```{r}
+```{r, warning = FALSE, message = FALSE}
 gm <- read_csv("http://bioconnector.org/data/gapminder.csv")
 gm_sub <- gm %>% filter(year > 2000) #data we would actually use.
-ggplot(gm_sub, aes(x = log(gdpPercap), y = lifeExp)) + geom_point(aes(color = continent)) + facet_zoom(x = log(gdpPercap) > 9) + 
+ggplot(gm_sub, aes(x = log(gdpPercap), y = lifeExp)) + geom_point(aes(color = continent)) + 
+  facet_zoom(x = log(gdpPercap) > 9) + 
   labs(title = "Scatterplot of GDP and Life Expectancy",
        subtitle = "Zoom:  Log of GDP greater than 9.0",
        caption = "Data from bioconnector.com",
        x = "Log of GDP Per Capita",
-       y = "Life Expectancy") + group1_315_theme
+       y = "Life Expectancy") + group1_315_theme +
+  scale_color_manual(values = group1_color_palette2)
 
 ```
 

@@ -1,0 +1,649 @@
+---
+title: "36-315 Homework 09, Fall 2017"
+author: "Group 1, Arjun Chidambaram: achidamb, Edward Ang: edwardan, Masahiro Abe: mabe, Killian Huang: xhuang1"
+date: "Due Thursday, Thursday 9th, 2017 (11:59pm ET) on Canvas"
+output: 
+  html_document:
+    toc:  true
+    toc_float:  true
+    code_folding:  hide
+---
+**Hadley Wickham's Advanced R Style Guide**
+
+##  Homework 09:  Networks, Variable Visualization, and New 1-D Graph Critiques
+
+***
+***
+
+#  Problem 0
+
++ Group Theme
+```{r, warning = FALSE, message = FALSE}
+library(tidyverse)
+group1_315_theme <-  theme_bw() + theme (
+      plot.title = element_text(size = 14, face = "bold", 
+                                lineheight = 1.2, color = "firebrick", family = "serif"),
+      axis.text = element_text(size = 9),
+      text = element_text(size = 10, face = "bold", color = "dodgerblue4"))
+
+```
++ Some Color Palettes
+```{r, warning = FALSE, message = FALSE}
+group1_color_palette1 <- c("#2D3184","#0082A6", "#4EBBB9", "#9CDFC2", "#D8F0CD","#F3F1E4")
+group1_color_palette2 <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+group1_color_palette3 <- c("#9A8822", "#F5CDB4", "#F8AFA8", "#FDDDA0", "#74A089", "#29211F")
+```
+
+We are using the Hadley Wickham's Advanced R Style Guide for this assignment.
+
+
+***
+***
+
+
+#  Problem 1 {.tabset}
+
+## PART A 
+
+```{r, warning = F, message = F}
+library(MASS)
+library(tidyverse)
+library(GGally)
+data(Cars93)
+cont_cols <- which(names(Cars93) %in% 
+                     c("Cars93", "Price", "MPG.city", "MPG.highway", "EngineSize",
+                       "Horsepower", "RPM", "Fuel.tank.capacity", "Passengers",
+                       "Length", "Wheelbase", "Width", "Turn.circle", "Weight"))
+
+ggparcoord(Cars93, columns = cont_cols) + aes(color = factor(Type)) + 
+  labs(
+    title = "Value vs Variables by Type of Car", 
+    x = "Variables", 
+    y = "Value" ) + 
+  coord_flip() + 
+  group1_315_theme + 
+  guides(color = guide_legend(title = "Car Type")) +
+  scale_colour_manual(values = group1_color_palette2)
+```
+
+## PART B
+
+Car type 4 gets better milage in MPG.highway and MPG.city than the rest of the car types. The values for car type 4 in these categories are around 4. Car Type 6 fits the most passengers and has a value close to 3 in the graph.
+
+## PART C
+
+```{r, warning = FALSE, message = FALSE}
+ggparcoord(Cars93, columns = cont_cols) + aes(color = factor(Type)) + 
+  coord_flip() + 
+  labs(
+    title = "Value vs Variables by Type of Car", 
+    x = "Variables", 
+    y = "Value") + 
+  coord_polar() +
+  group1_315_theme +
+  guides(color = guide_legend(title = "Car Type")) +
+  scale_colour_manual(values = group1_color_palette2)
+```
+
+Parallel coordinate graph in part a is easier to read because the values are labeled in a circle in the polar coordinate graph. The graph also attracts readers' attention to the outer/greater value (i.e. 4)but not so much to lower values (i.e. -2), which is a distortion.
+
+## PART D
+
+The default scale for y-axis is standard deviation, which allows us to compare how much different car types vary at each variable. The parameter that matches our introduction in class is `uniminmax` and we didn't flip the coordinates.
+
+```{r, warning = FALSE, message = FALSE}
+ggparcoord(Cars93, columns = cont_cols, scale = "uniminmax") + 
+  aes(color = factor(Type)) +  
+  labs(
+    title = "Value vs Variables by Type of Car", 
+    x = "Variables", 
+    y = "Value"
+    ) +
+  group1_315_theme +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1)) +
+  guides(color = guide_legend(title = "Car Type")) +
+  scale_colour_manual(values = group1_color_palette2)
+```
+
+## PART E
+
+
+There aren't any two types that are really positively correlated. The two most positively correlated car types are probably car types (1,3) and (2,3). The type 3 color lines are usually between type 2 and type 1, and they tend to follow a similar pattern with slightly different degree. The two pairs that are most negatively correlated are type (4,6) and (2,4). Type 4 is mostly at the opposite value as 2 and 6, for example, for the last five variables, type 4 cars are mostly at the bottom with values around 0, but type 2 adn 6 are all the way on the top with values close to 1.
+
+***
+***
+
+
+
+#  Problem 2 {.tabset}
+
+## PART A
+
+```{r, warning = F, message = F}
+cars_cont <- dplyr::select(Cars93, Price, MPG.city, MPG.highway, EngineSize, 
+                           Horsepower, RPM, Fuel.tank.capacity, Passengers,
+                           Length, Wheelbase, Width, Turn.circle, Weight)
+```
+
+## PART B
+
+```{r, warning = F, message = F}
+library(reshape2)
+correlation_matrix <- cor(cars_cont)
+melted_cormat <- melt(correlation_matrix)
+ggplot(data = melted_cormat, aes(x = Var1, y = Var2, fill = value)) + 
+  geom_tile()+labs(title = 'Cars Correlation Heat Map', x = '', y = '') + 
+  scale_fill_gradient2(low = "dark red", high = "dark blue",   
+                       mid =  "light grey", 
+   midpoint = 0, limit = c(-1,1), space = "Lab", 
+   name="Correlation") + group1_315_theme +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+## PART C
+
++ We notice that Weight and Turn.circle, Weight and Width, Weight and Wheelbase, Weight and Fuel tank capacity, Engine Size and Width, and  MPG city and MPG highway are highly positively correlated pairs of variables. 
++ We notice that Mpg City and Weight, MPG highway and Weight, and MPG city and fuel tank capacity and MPG highway and fuel tank capacity are highly negatively correlated pairs of variables.  
++ We notice that Passengers and Price, RPM and Price, Horsepower and Passengers, and Horsepower and RPM are variable pairs with little to no correlation
+
+## PART D
+
+The plot above is a heat map. It is a graphical representation of the correlations between all possible variables and uses a color gradient to show the strength/value of the correlation. It does so for a matrix of the variables giving us every possible pair of selected variables from the dataset.
+ 
+## PART E
+This reminds me a lot of mosaic plots.
+
+## PART F
+
+```{r, warning = F, message = F, fig.width=10}
+# Taken from guide
+reorder_cormat <- function(cormat){
+# Use correlation between variables as distance
+dd <- as.dist((1-cormat)/2)
+hc <- hclust(dd)
+cormat <-cormat[hc$order, hc$order]
+}
+
+
+get_upper_tri<-function(cormat){
+    cormat[lower.tri(cormat)] <- NA
+    return(cormat)
+  }
+
+correlation_matrix <- cor(cars_cont)
+correlation_matrix <- reorder_cormat(correlation_matrix)
+correlation_matrix <- get_upper_tri(correlation_matrix)
+melted_cormat <- melt(correlation_matrix, na.rm=TRUE)
+ggplot(data = melted_cormat, aes(x = Var1, y = Var2, fill = value)) + 
+  geom_tile() + labs(title = 'Cars Correlation Heat Map', x = '', y = '') + 
+  scale_fill_gradient2(low = "dark red", high = "dark blue",   
+                       mid =  "light grey", 
+   midpoint = 0, limit = c(-1,1), space = "Lab", 
+   name="Correlation") + 
+  geom_text(aes(Var1, Var2, label=sprintf("%0.2f", round(value, digits = 2))), 
+            color = "green", size = 6) + 
+  group1_315_theme +
+  theme(text = element_text(size=15), 
+        axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+
+***
+***
+
+
+# Problem 3 {.tabset}
+
+```{r, warning = FALSE, message = FALSE}
+library(tidyverse)
+library("MASS")
+```
+
+
+## PART A
+
+```{r, warning = FALSE, message = FALSE, fig.height = 8, fig.width = 12}
+# load dendextend
+library(dendextend)
+
+# only keep continuous variables
+cars_cont <- subset(Cars93, select = -c(Manufacturer, Model, Type, AirBags,
+                                        DriveTrain, Cylinders, Man.trans.avail, 
+                                        Origin, Make, Rear.seat.room,
+                                        Luggage.room))
+
+# correlation matrix
+cars_cor <- cor(cars_cont)
+
+# positive values
+cars_cor <- 1 - abs(cars_cor)
+
+# dist matrix
+cars_dist <- as.dist(cars_cor)
+
+# hierarchical clustering
+cars_hc <- hclust(cars_dist, method = "complete")
+
+# convert to dendrogram
+cars_dend <- as.dendrogram(cars_hc)
+
+# plot dendgrogram
+cars_dend %>% 
+  set("labels", colnames(cars_cont), order_value = TRUE) %>%
+  set("branches_k_color", k = 4) %>%
+  ggplot(horiz = T) +
+  labs(title = "Correlation between Continuous Variables in Cars93",
+       x = "Make", 
+       y = "Pairwise Euclidean Distance") +
+  group1_315_theme +
+  theme(axis.title.y = element_blank(),
+        axis.title.x = element_text(color = "black"),
+        axis.text.x = element_text(color = "black", angle = 90))
+
+```
+
+
+## PART B
+
+Passengers and RPM are in their own clusters, while all variables related to price and horsepower is in its own cluster.  This makes sense because all the price variables should be correlated and horsepower correlating with prices seem to be logical.  All the other variables relating to size, efficiency and revolutions per mile is in the final cluster.  This also makes sense logically because all size and efficiency variables should be correlated with other size and efficiency variables.  These observations are consistent with part f of problem 2.
+
+## PART C
+
+We could use the covariance between the continuous variables instead of the correlation.
+
+
+***
+***
+
+
+
+
+
+#  Problem 4 {.tabset}
+
+
+## PART A
+They plotted the social network between the characters by the number of scenes that the characters shared between one another.  They then use the edges to explain plot points that happen in the film. They also measured the number of different characters that a certain character has a conversation with to determine social activity.
+
+## PART B
+
+```{r, warning = FALSE, message = FALSE, fig.height = 8, fig.width = 12}
+# load forcats
+library(forcats)
+
+# read dataframe
+love_adjacency <- read_csv("https://raw.githubusercontent.com/fivethirtyeight/data/master/love-actually/love_actually_adjacencies.csv")
+
+# change category names
+love_adjacency <- love_adjacency %>%
+  mutate(actors = fct_recode(actors,
+    "Bill Nighy" = "bill_nighy",
+                           "Keira Knightley" = "keira_knightley",
+                           "Andrew Lincoln" = "andrew_lincoln",
+                           "Hugh Grant" = "hugh_grant",
+                           "Colin Firth" = "colin_firth",
+                           "Alan Rickman" = "alan_rickman",
+                           "Heike Makatsch" = "heike_makatsch",
+                           "Laura Linney" = "laura_linney",
+                           "Emma Thompson" = "emma_thompson",
+                           "Liam Neeson" = "liam_neeson",
+                           "Kris Marshall" = "kris_marshall",
+                           "Abdul Salis" = "abdul_salis",
+                           "Martin Freeman" = "martin_freeman",
+                           "Rowan Atkinson" = "rowan_atkinson"))
+
+# distance matrix
+love_dist <- 1 / (1 + as.dist(love_adjacency[,-1]))
+
+# hierarchical clustering
+love_hc <- hclust(love_dist, method = "average")
+
+# convert to dendrogram
+love_dend <- as.dendrogram(love_hc)
+
+# plot dendrogram
+love_dend %>% 
+  set("labels", love_adjacency$actors, order_value = TRUE) %>%
+  ggplot(horiz = T) +
+  labs(title = "Adjacency of Actors in Love Actually", 
+       y = "Pairwise Euclidean Distance") +
+  theme(axis.title.y = element_blank(),
+        axis.title.x = element_text(color = "black"),
+        axis.text.x = element_text(color = "black", angle = 90)) +
+  group1_315_theme
+```
+
+## PART C
+Tony, Colin and John are connected; Mark, Juliet, Sarah and Jamie are connected; Daniel, Billy and the prime minister are connected; finally, Karen, Harry and Mia are connected.
+
+## PART D
+ggraph is an extension of ggplot mainly for networks and trees.  `ggraph()` is the equivalent of `ggplot()`.  It was released Feb 23, 2017.
+
+## PART E
+
+
+```{r, warning = FALSE, message = FALSE}
+# load ggraph
+library(ggraph)
+
+# plot dendrogram
+ggraph(love_hc, layout = "dendrogram") +
+  geom_edge_elbow() +
+  labs(title = "Adjacency of Actors in Love Actually",
+       x = "Actors",
+       y = "Pairwise Euclidean Distance") +
+  theme(axis.ticks = element_blank(),
+        axis.text.x = element_blank()) +
+  group1_315_theme
+```
+
+## PART F
+
+```{r, warning = FALSE, message = FALSE}
+# load igraph library
+library(igraph)
+
+# define names, graph (dist)
+names <- love_adjacency[,1]
+graph <- graph_from_adjacency_matrix(as.dist(love_adjacency[,-1]))
+
+# plot network
+ggraph(graph, layout = 'graphopt') + 
+    geom_edge_link() +
+  group1_315_theme +
+  labs(
+    title = "Love Actually Network"
+  ) +
+  theme(axis.title = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text = element_blank())
+
+```
+
+## PART G
+
+```{r, fig.height = 5, fig.width = 7, warning = FALSE, message = FALSE}
+# change to circular, arcs and add text
+V(graph)$Popularity <- degree(graph, mode = 'in')
+
+ggraph(graph, layout = 'linear', circular = TRUE) + 
+  geom_edge_arc() +
+  geom_node_point(aes(size = Popularity)) +  
+  geom_node_text(aes(label = names), nudge_x = 0.2, nudge_y = 0.2, 
+                 size = 6, hjust = 1, vjust = 2, color = "navy", fontface = "bold") +
+  theme_graph(foreground = 'steelblue', fg_text_colour = 'white') +
+  labs(
+    title = "Love Actually Network"
+  ) +
+  group1_315_theme +
+  theme(axis.ticks = element_blank(),
+        axis.text = element_blank())
+```
+
+## PART H (BONUS)
+
+```{r, fig.height = 5, fig.width = 7, warning = FALSE, message = FALSE}
+
+females = c("Keira Knightley", "Heike Makatsch", "Emma Thompson", "Laura Linney")
+love_adjacency <- mutate(love_adjacency,
+                         gender = ifelse(actors %in% females, 1,  0))
+
+# define names, graph (dist)
+names <- love_adjacency[,1]
+genders <- factor(love_adjacency$gender)
+
+# meltDF$variable=as.numeric(levels(meltDF$variable))[meltDF$variable]
+
+graph <- graph_from_adjacency_matrix(as.dist(love_adjacency[-c(1,16)]))
+# g = c("M","M","M","M","M","M","M","F","M","M","M","M","M","M","M")
+# gp = c(0,0,0,1,0,0,0,0,1,1,1,0,0,0)
+
+V(graph)$Popularity <- degree(graph, mode = 'in')
+V(graph)$Gender <- genders
+graph <- graph %>% set_vertex_attr("Gender", value = genders)
+
+
+ggraph(graph, layout = 'linear', circular = TRUE) + 
+  geom_edge_arc() +
+  geom_node_point(aes(color = genders, size = Popularity)) +
+  geom_node_text(aes(label = names), nudge_x = 0.2, nudge_y = 0.2,
+                 size = 6, hjust = 1, vjust = 2, color = "navy", fontface = "bold") +
+  theme_graph(foreground = 'steelblue', fg_text_colour = 'white') +
+  labs(
+    title = "Love Actually Network"
+  ) +
+  group1_315_theme +
+  theme(axis.ticks = element_blank(),
+        axis.text = element_blank()) +
+  scale_colour_manual(values = group1_color_palette2)
+  
+```
+
+
+***
+***
+
+
+#  Problem 5 {.tabset}
+
+## PART A
+
+```{r, warning = FALSE, message = FALSE}
+#  Set up data to create the waffle chart
+library(MASS)
+data(Cars93)
+var <- Cars93$Type  # the categorical variable you want to plot 
+nrows <- 9  #  the number of rows in the resulting waffle chart
+categ_table <- floor(table(var) / length(var) * (nrows*nrows))
+temp <- rep(names(categ_table), categ_table)
+df <- expand.grid(y = 1:nrows, x = 1:nrows) %>%
+  mutate(category = sort(c(temp, sample(names(categ_table), 
+                                        nrows^2 - length(temp), 
+                                        prob = categ_table, 
+                                        replace = T))))
+
+#  Make the Waffle Chart
+ggplot(df, aes(x = x, y = y, fill = category)) + 
+  geom_tile(color = "black", size = 0.5) +
+  scale_x_continuous(breaks = NULL) +
+  scale_y_continuous(breaks = NULL) +
+  labs(title = "Waffle Chart of Car Type",
+       caption = "Source:  Cars93 Dataset", 
+       fill = "Car Type",
+       x = NULL, y = NULL) + 
+  theme_bw() + group1_315_theme +
+  scale_fill_manual(values = group1_color_palette2)
+```
+
+The purpose of waffle chart is to visualize the proportions of each category of the `fill` variable. It should be used on categorical `fill` data like car type in this example. Usually only one variable is enough, which is the `fill` variable. However, if we need to, we can also facet it based on other variables. 
+
+## PART B
+
+```{r, warning = FALSE, message = FALSE}
+#  Set up data to create the waffle chart
+library(MASS)
+IMDB <- read_csv("https://raw.githubusercontent.com/mateyneykov/315_code_data/master/data/imdb_test.csv")
+var <- IMDB$content_rating  # the categorical variable you want to plot 
+nrows <- 50  #  the number of rows in the resulting waffle chart
+categ_table <- floor(table(var) / length(var) * (nrows*nrows))
+temp <- rep(names(categ_table), categ_table)
+df <- expand.grid(y = 1:nrows, x = 1:nrows) %>%
+  mutate(category = sort(c(temp, sample(names(categ_table), 
+                                        nrows^2 - length(temp), 
+                                        prob = categ_table, 
+                                        replace = T))))
+
+#  Make the Waffle Chart
+ggplot(df, aes(x = x, y = y, fill = category)) + 
+  geom_tile(color = "black", size = 0.5) +
+  scale_x_continuous(breaks = NULL) +
+  scale_y_continuous(breaks = NULL) +
+  labs(title = "Waffle Chart of Content Rating",
+       caption = "Source: IMDB", 
+       fill = "Content Rating",
+       x = NULL, y = NULL) + 
+  group1_315_theme +
+  scale_fill_manual(values = group1_color_palette2)
+```
+
+
+I like the graph with 50 rows more because the NC-17 category stands out. The graph with 25 rows ignores this category completely because it doesn't take up a large enough proportion. Since the overall proportions of each category is still clearly visualized, so having more rows doesn't mean having uncessary data ink. And I think showing all categories is better in this case.
+
+
+## PART C
+
+There are three main issues with waffle charts:
++ People are bad at visualizing areas. If we have two categories of similar proportions, it's going to be hard to tell which one is bigger and by how much. For example, the large and sporty types of cars look like they have similar proportions.
++ The colors can be very distracting with more than 3 categories. It can also be manipulated so that some categories stand out more than others.
++ The number of rows can vary a lot and the graph heavily depends on the number of rows. It can also be easily manipulated to mislead the readers.
+
+
+***
+***
+
+
+# Problem 6 {.tabset}
+
+## PART A
+
+```{r, warning = FALSE, message = FALSE, fig.height = 3, fig.width = 4}
+library(ggforce)
+Cars93 %>% group_by(Type) %>% 
+  summarize(count = n()) %>% 
+  mutate(max = max(count),
+         focus_var = 0.2 * (count == max(count))) %>%
+  ggplot() + geom_arc_bar(aes(x0 = 0, y0 = 0, r0 = 1.2, r = 1, 
+                              fill = Type, amount = count), 
+                          stat = 'pie') +
+  labs(
+    title = "Car Type Distribution",
+    x = "",
+    y = ""
+  ) +
+  scale_x_continuous(breaks = NULL) +
+  scale_y_continuous(breaks = NULL) + 
+  group1_315_theme +
+  scale_fill_manual(values = group1_color_palette2)
+```
+
+## PART B
+
+The r0 parameter controls how thick the arc pie chart is. The minimum value is 0 and the maximum value is 1.
+
+
+## PART C
+
+```{r, warning = FALSE, message = FALSE, fig.height = 3, fig.width = 4}
+Cars93 %>% group_by(Type) %>% 
+  summarize(count = n()) %>% 
+  mutate(max = max(count),
+         focus_var = 0.2 * (count == max(count))) %>%
+  ggplot() + geom_arc_bar(aes(x0 = 0, y0 = 0, r0 = 1.2, r = 1, 
+                              fill = Type, amount = count, explode = focus_var), 
+                          stat = 'pie') +
+  labs(
+    title = "Car Type Distribution",
+    x = "",
+    y = ""
+  ) +
+  scale_x_continuous(breaks = NULL) +
+  scale_y_continuous(breaks = NULL) + 
+  group1_315_theme +
+  scale_fill_manual(values = group1_color_palette2)
+
+```
+
+This draws our attention to the variable of most interest. The section of the chart becomes disconnected, which puts more emphasis on that variable. 
+
+## PART D
+
+```{r, warning = FALSE, message = FALSE, fig.height = 3, fig.width = 4}
+Cars93 %>% group_by(Type) %>% 
+  summarize(count = n()) %>% 
+  mutate(min = min(count),
+         focus_var = 0.2 * (count == min(count))) %>%
+  ggplot() + geom_arc_bar(aes(x0 = 0, y0 = 0, r0 = 1.2, r = 1, 
+                              fill = Type, amount = count, explode = focus_var), 
+                          stat = 'pie') +
+  labs(
+    title = "Car Type Distribution",
+    x = "",
+    y = ""
+  ) +
+  scale_x_continuous(breaks = NULL) +
+  scale_y_continuous(breaks = NULL) + 
+  group1_315_theme +
+  scale_fill_manual(values = group1_color_palette2)
+
+```
+
+
+## PART E
+
+Ideally, you would use an arc pie chart to visualize discrete, 2d quantities. An issue with arc pie charts is that it is sometimes hard to determine the areas of the categories with respect to each other. An issue with using "explode" is that the graph looks disconnected and further distorts our perception of area. 
+
+***
+***
+
+
+
+#  Problem 7 {.tabset}
+
+
+```{r, warning = FALSE, message = FALSE}
+library(tidyverse)
+library(forcats)
+library(devtools)
+library(ggforce)
+
+#  Colorblind-friendly color pallette
+my_colors <- c("#000000", "#56B4E9", "#E69F00", "#F0E442", "#009E73", "#0072B2", 
+               "#D55E00", "#CC7947")
+
+#  Read in the data
+imdb <- read_csv("https://raw.githubusercontent.com/mateyneykov/315_code_data/master/data/imdb_test.csv")
+
+# get some more variables
+imdb <- mutate(imdb, profit = (gross - budget) / 1000000,
+               is_french = ifelse(country == "France", "Yes", "No")) %>%
+  filter(movie_title != "The Messenger: The Story of Joan of Arc")
+france_1990 <- filter(imdb, country == "France", title_year >= 1990)
+
+# this code plots a scatterplot + a zoomed facet
+ggplot(data = imdb, aes(x = title_year, y = profit)) + 
+  geom_point(color = my_colors[1], alpha = 0.25) + 
+  geom_smooth(color = my_colors[2]) + 
+  geom_point(data = france_1990, color = my_colors[3]) + 
+  geom_smooth(data = france_1990, aes(x = title_year, y = profit), 
+              color = my_colors[4], method = lm) + 
+  facet_zoom(x = title_year >= 1990) + 
+  labs(title = "Movie Profits over Time",
+       subtitle = "Zoom:  French Movies from 1990 -- 2017 (orange/yellow)",
+       caption = "Data from IMDB and Kaggle",
+       x = "Year of Release",
+       y = "Profit (millions of USD)") +
+  group1_315_theme
+```
+
+## PART A
+
+```{r, warning = FALSE, message = FALSE}
+gm <- read_csv("http://bioconnector.org/data/gapminder.csv")
+gm_sub <- gm %>% filter(year > 2000) #data we would actually use.
+ggplot(gm_sub, aes(x = log(gdpPercap), y = lifeExp)) + geom_point(aes(color = continent)) + 
+  facet_zoom(x = log(gdpPercap) > 9) + 
+  labs(title = "Scatterplot of GDP and Life Expectancy",
+       subtitle = "Zoom:  Log of GDP greater than 9.0",
+       caption = "Data from bioconnector.com",
+       x = "Log of GDP Per Capita",
+       y = "Life Expectancy") + group1_315_theme +
+  scale_color_manual(values = group1_color_palette2)
+
+```
+
+## PART B
+
+With the new zooming feature, we are able to see the distribution of countries with a log of GDP per capita greater than 9 in more detail. In the new graph, we can now see how countries in Europe match up to countries in the Americas.
+
+***
+***
