@@ -226,6 +226,9 @@ library(ggraph)
 
 names <- love_adjacency[,1]
 graph <- graph_from_adjacency_matrix(as.dist(love_adjacency[,-1]))
+ggraph(graph) +
+  geom_edge_link(aes(color = )) +
+  geom_node_point()
 ```
 
 g.  (2 points each)  Using the documentation at the link in parts (d), (e), and the `ggraph` [GitHub page](https://github.com/thomasp85/ggraph), make at least three adaptations to your graph from (f).  For example, you might size the points, size the edges, use arcs (curved edges), use `geom_edge_density`, etc.
